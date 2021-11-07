@@ -1,0 +1,12 @@
+[Unit]
+Description=session overflow server
+
+[Service]
+User=ubuntu
+ExecStart=/usr/local/bin/session-overflow server --from 8500 --to 9500 --linger 10
+Restart=always
+LimitNOFILE=1006500
+Environment=GOGC=500
+
+[Install]
+WantedBy=multi-user.target
