@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -108,8 +109,14 @@ var dialer = net.Dialer{
 func (opts *cliOpts) cliWorker(addr string) {
 	conn, err := dialer.Dial("tcp4", addr)
 	if err != nil {
-		log.Printf("%v", err)
-		return
+		if strings.Contains(err.Error(), "connection reset by peer") {
+			// treat reset as success
+			atomic.AddUint64(&opts.newConnections, 1)
+			return
+		} else {
+			log.Printf("%v", err)
+			return
+		}
 	}
 	defer conn.Close()
 	atomic.AddUint64(&opts.newConnections, 1)
