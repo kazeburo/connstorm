@@ -22,16 +22,16 @@ type commonSetting struct {
 
 type srvOpts struct {
 	commonSetting
-	BindAddr    string        `long:"listen" short:"l" default:"0.0.0.0" description:"address for listen"`
-	ReadTimeout time.Duration `long:"read-timeout" default:"30s" description:"read timeout"`
-	Linger      int           `long:"linger" default:"0" description:"lingering timeout"`
+	BindAddr string        `long:"listen" short:"l" default:"0.0.0.0" description:"address for listen"`
+	Linger   int           `long:"linger" default:"0" description:"lingering timeout"`
+	Delay    time.Duration `long:"delay" default:"0.1s" description:"delay time before close socket"`
 }
 
 type cliOpts struct {
 	commonSetting
-	Addrs      []string      `long:"host" short:"H" required:"true" description:"hostname[s] to connect"`
-	MaxWorkers uint          `long:"max-workers" default:"100" description:"max number of worker to connect to server"`
-	Delay      time.Duration `long:"delay" default:"0.1s" description:"delay time before close socket"`
+	Addrs       []string      `long:"host" short:"H" required:"true" description:"hostname[s] to connect"`
+	MaxWorkers  uint          `long:"max-workers" default:"100" description:"max number of worker to connect to server"`
+	ReadTimeout time.Duration `long:"read-timeout" default:"30s" description:"read timeout"`
 }
 
 var globalPool = sync.Pool{
@@ -44,13 +44,8 @@ var globalPool = sync.Pool{
 func (opts *srvOpts) handleConnection(conn net.Conn) {
 	defer conn.Close()
 	atomic.AddUint64(&opts.newConnections, 1)
-	conn.(*net.TCPConn).SetLinger(2)
-	conn.SetReadDeadline(time.Now().Add(opts.ReadTimeout))
-	buf := globalPool.Get().(*[]byte)
-	defer func() {
-		globalPool.Put(buf)
-	}()
-	conn.Read(*buf)
+	conn.(*net.TCPConn).SetLinger(opts.Linger)
+	time.Sleep(opts.Delay)
 }
 
 func (opts *srvOpts) handleListener(l net.Listener) {
@@ -87,9 +82,9 @@ func (opts *srvOpts) Execute(args []string) error {
 	opts.prevConnections = 0
 
 	lc := tcplisten.Config{
-		DeferAccept: true,
-		// FastOpen:    true,
-		ReusePort: true,
+		DeferAccept: false,
+		FastOpen:    false,
+		ReusePort:   true,
 	}
 
 	for port := opts.FromPort; port <= opts.ToPort; port++ {
@@ -105,7 +100,7 @@ func (opts *srvOpts) Execute(args []string) error {
 }
 
 var dialer = net.Dialer{
-	Timeout:       30 * time.Second,
+	Timeout:       10 * time.Second,
 	FallbackDelay: -1 * time.Second,
 	KeepAlive:     -1 * time.Second,
 }
@@ -114,12 +109,16 @@ func (opts *cliOpts) cliWorker(addr string) {
 	conn, err := dialer.Dial("tcp4", addr)
 	if err != nil {
 		log.Printf("%v", err)
-		time.Sleep(opts.Delay)
 		return
 	}
 	defer conn.Close()
 	atomic.AddUint64(&opts.newConnections, 1)
-	time.Sleep(opts.Delay)
+	conn.SetReadDeadline(time.Now().Add(opts.ReadTimeout))
+	buf := globalPool.Get().(*[]byte)
+	defer func() {
+		globalPool.Put(buf)
+	}()
+	conn.Read(*buf)
 }
 
 func (opts *cliOpts) Counter() {
