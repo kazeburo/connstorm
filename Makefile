@@ -1,15 +1,15 @@
 VERSION=0.0.2
 LDFLAGS=-ldflags "-w -s -X main.version=${VERSION} "
 
-all: session-overflow
+all: connstorm
 
-.PHONY: session-overflow
+.PHONY: connstorm
 
-session-overflow: main.go
-	go build $(LDFLAGS) -o session-overflow main.go
+connstorm: main.go
+	go build $(LDFLAGS) -o connstorm main.go
 
 linux: main.go
-	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o session-overflow main.go
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o connstorm main.go
 
 check:
 	go test ./...

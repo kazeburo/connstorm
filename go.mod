@@ -1,4 +1,4 @@
-module github.com/kazeburo/session-overflow
+module github.com/kazeburo/connstorm
 
 go 1.17
 

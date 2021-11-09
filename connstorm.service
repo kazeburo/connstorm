@@ -1,9 +1,9 @@
 [Unit]
-Description=session overflow server
+Description=connection storm server
 
 [Service]
 User=root
-ExecStart=/usr/local/bin/session-overflow server --from 8500 --to 8800 --linger 1 --delay 0.1s
+ExecStart=/usr/local/bin/connstorm server --from 8500 --to 8800 --linger 1 --delay 0.1s
 Restart=always
 LimitNOFILE=1006500
 LimitNPROC=1006500

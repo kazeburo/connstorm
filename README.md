@@ -1,4 +1,4 @@
-# session-overflow
+# connstorm
 
 make connection storm between server and client for benchmarking network stuff.
 
@@ -6,7 +6,7 @@ make connection storm between server and client for benchmarking network stuff.
 
 ```
 Usage:
-  session-overflow [OPTIONS] <client | server>
+  connstorm [OPTIONS] <client | server>
 
 Help Options:
   -h, --help  Show this help message
@@ -21,7 +21,7 @@ client help
 
 ```
 Usage:
-  session-overflow [OPTIONS] client [client-OPTIONS]
+  connstorm [OPTIONS] client [client-OPTIONS]
 
 Help Options:
   -h, --help              Show this help message
@@ -38,7 +38,7 @@ server help
 
 ```
 Usage:
-  session-overflow [OPTIONS] server [server-OPTIONS]
+  connstorm [OPTIONS] server [server-OPTIONS]
 
 Help Options:
   -h, --help        Show this help message
@@ -57,13 +57,13 @@ Help Options:
 exec server
 
 ```
-$ /usr/local/bin/session-overflow server --from 8500 --to 8800 --linger 1 --delay 0.1s
+$ /usr/local/bin/connstorm server --from 8500 --to 8800 --linger 1 --delay 0.1s
 ```
 
 run client 
 
 
 ```
-$ GOGC=500 /usr/local/bin/session-overflow client -H server1 -H server2 -H server3 --from 8500 --to 8800 --max-workers 10000
+$ GOGC=500 /usr/local/bin/connstorm client -H server1 -H server2 -H server3 --from 8500 --to 8800 --max-workers 10000
 ```
 
