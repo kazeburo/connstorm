@@ -1,6 +1,6 @@
 # connstorm
 
-make connection storm between server and client for benchmarking network stuff.
+make TCP connection storm between server and client for benchmarking network stuff.
 
 ## usage
 
@@ -65,5 +65,8 @@ run client
 
 ```
 $ GOGC=500 /usr/local/bin/connstorm client -H server1 -H server2 -H server3 --from 8500 --to 8800 --max-workers 10000
+2021/11/09 13:12:04 newConnection: 103270.200000 connections/sec
+2021/11/09 13:12:14 newConnection: 105419.600000 connections/sec
+2021/11/09 13:12:24 newConnection: 108597.700000 connections/sec
 ```
 
